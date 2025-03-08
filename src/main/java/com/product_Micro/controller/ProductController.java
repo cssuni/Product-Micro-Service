@@ -33,9 +33,9 @@ public class ProductController {
     @GetMapping("/get/{id}")
     public ResponseEntity<ApiResponse> getProduct(@PathVariable Long id) {
         try{
-            Product product = productService.getProductById(id);
+
             return ResponseEntity.ok(new ApiResponse("Product found successfully",
-                    productService.productToDto(product)));
+                    productService.getProductDtoById(id)));
         }catch (ProductNotFoundException e){
             return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
         }
@@ -148,6 +148,17 @@ public class ProductController {
                 ok(new ApiResponse("Products  found successfully",
                         productService.countProductsByBrandAndName(brand, category)));
 
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse> searchProduct(@RequestParam String query) {
+
+        try{
+            return ResponseEntity.ok(new ApiResponse("Products found successfully",
+                    productService.searchProducts(query)));
+        }catch (ProductNotFoundException e){
+            return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
+        }
     }
 
 }

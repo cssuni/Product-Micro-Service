@@ -4,6 +4,7 @@ package com.product_Micro.service.product;
 
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.product_Micro.Model.Product;
 import com.product_Micro.dto.ProductDto;
 import com.product_Micro.request.AddProductRequest;
@@ -19,7 +20,7 @@ public interface IProductService {
 
     Product updateProduct(AddProductRequest request, Long Id);
 
-    Product getProductById(Long id);
+    ProductDto getProductDtoById(Long id) throws JsonProcessingException;
 
     void deleteProductById(Long id);
 
@@ -38,4 +39,6 @@ public interface IProductService {
     Long countProductsByBrandAndName(String brand, String name);
 
     List<ProductDto> addBulkProduct(List<AddProductRequest> products);
+
+    List<ProductDto> searchProducts(String searchTerm);
 }

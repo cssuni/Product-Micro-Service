@@ -2,16 +2,18 @@ package com.product_Micro.service.product;
 
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product_Micro.Model.Product;
 import com.product_Micro.dto.ProductDto;
 import com.product_Micro.exception.ProductNotFoundException;
 import com.product_Micro.repository.CategoryRepository;
 import com.product_Micro.repository.ProductRepository;
 import com.product_Micro.request.AddProductRequest;
-import io.micrometer.observation.annotation.Observed;
+import com.product_Micro.service.RedisService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import com.product_Micro.Model.Category;
 
@@ -25,6 +27,8 @@ public class ProductService implements IProductService{
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ModelMapper modelMapper;
+    private final RedisService redisService;
+
 //    private final ImageRepository imageRepository;
 
     @Override
@@ -92,9 +96,22 @@ public class ProductService implements IProductService{
     }
 
     @Override
-    public Product getProductById(Long id) {
+    public ProductDto getProductDtoById(Long id)  {
+        ProductDto productDto = redisService.findProductInRedis(id);
+        if( productDto!= null)
+            return productDto;
+
         return productRepository.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product not found!!!"));
+                .map(product -> {
+                                    ProductDto productDto1 = productToDto(product);
+                                    redisService.storeProductDtoInRedis(productDto1);
+                                    return productDto1;
+        }).orElseThrow(() -> new ProductNotFoundException("Product now found!!!"));
+    }
+
+    public Product getProductById(Long id) {
+        return productRepository.
+                findById(id).orElseThrow(() -> new ProductNotFoundException("Product not found!!!"));
     }
 
     @Override
@@ -165,6 +182,16 @@ public class ProductService implements IProductService{
         return productRepository.countByBrandAndCategory(brand,category);
     }
 
+    @Override
+    public List<ProductDto> searchProducts(String searchTerm) {
+        List<Product> products = productRepository.searchProducts(searchTerm);
+        if(!products.isEmpty()) {
+            return products.stream().map(this::productToDto).toList();
+        } else {
+            throw new ProductNotFoundException("Products not found");
+        }
+
+    }
 
 
 
