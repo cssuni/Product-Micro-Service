@@ -5,8 +5,10 @@ package com.product_Micro.service.product;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.product_Micro.Model.Product;
+import com.product_Micro.dto.ProductDTOforCart;
 import com.product_Micro.dto.ProductDto;
 import com.product_Micro.exception.ProductNotFoundException;
+import com.product_Micro.exception.ResourceNotFoundException;
 import com.product_Micro.repository.CategoryRepository;
 import com.product_Micro.repository.ProductRepository;
 import com.product_Micro.request.AddProductRequest;
@@ -193,6 +195,22 @@ public class ProductService implements IProductService{
 
     }
 
+    public ProductDTOforCart giveDetailsToCart(Long id){
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Product Not Found"));
+
+        String url = "http://localhost:8080/api/v1/products/get/"+id.toString();
+
+        ProductDTOforCart productDTOforCart = new ProductDTOforCart();
+        productDTOforCart.setId(product.getId());
+        productDTOforCart.setPrice(product.getPrice());
+        productDTOforCart.setName(product.getName());
+        productDTOforCart.setUrl(url);
+
+        return productDTOforCart;
+
+    }
 
 
 }

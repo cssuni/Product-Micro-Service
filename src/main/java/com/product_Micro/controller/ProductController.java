@@ -3,6 +3,7 @@ package com.product_Micro.controller;
 
 
 import com.product_Micro.Model.Product;
+import com.product_Micro.dto.ProductDTOforCart;
 import com.product_Micro.dto.ProductDto;
 import com.product_Micro.exception.ProductNotFoundException;
 import com.product_Micro.request.AddProductRequest;
@@ -159,6 +160,13 @@ public class ProductController {
         }catch (ProductNotFoundException e){
             return ResponseEntity.badRequest().body(new ApiResponse(e.getMessage(), null));
         }
+    }
+
+    @GetMapping("/getProductForCart")
+    public ProductDTOforCart getProductDetails(@RequestParam Long productId){
+
+        return productService.giveDetailsToCart(productId);
+
     }
 
 }
